@@ -56,13 +56,9 @@ export default function HashSet() {
             throw new Error("Trying to access index out of bounds");
          }
          let list = buckets[index];
-         let current = list.head;
+         if (!list) return false;
 
-         while (current) {
-            if (current.value === value) return true;
-            current = current.next;
-         }
-         return false;
+         return list.contains(value);
       },
 
       remove(value) {
@@ -102,12 +98,9 @@ export default function HashSet() {
 
       resize() {
          const oldEntries = this.entries();
-         capacity *= 2;
-         this.capacity = capacity;
-
+         this.capacity *= 2;
          this.size = 0;
-         buckets = new Array(capacity).fill(null).map(() => LinkedList());
-         this.buckets = buckets;
+         this.buckets = new Array(capacity).fill(null).map(() => LinkedList());
 
          oldEntries.forEach(([value]) => this.add(value));
       },

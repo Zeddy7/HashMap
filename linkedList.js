@@ -119,15 +119,28 @@ export default function LinkedList() {
          return null;
       },
 
-      insertAt(index, value) {
+      insertAt(index, ...[keys, values]) {
          if (index < 0 || index > this.size) return;
 
          if (index === 0) {
-            this.prepend(value);
+            let firstEntry = Node(keys[0], values[0]);
+            let nextEntry = firstEntry;
+            let idx = 1;
+
+            while (idx < values.length) {
+               nextEntry.next = Node(keys[idx], values[idx]);
+               nextEntry = nextEntry.next;
+               idx++;
+            }
+
+            nextEntry.next = this.head;
+            this.head = firstEntry;
+
+            this.size += values.length;
             return;
          }
 
-         let current, previous, newNode;
+         let current, previous;
 
          current = this.head;
          let count = 0;
@@ -138,11 +151,20 @@ export default function LinkedList() {
             count++;
          }
 
-         newNode = Node(value);
-         newNode.next = current;
-         previous.next = newNode;
+         let firstEntry = Node(keys[0], values[0]);
+         let nextEntry = firstEntry;
+         let idx = 1;
 
-         this.size++;
+         while (idx < values.length) {
+            nextEntry.next = Node(keys[idx], values[idx]);
+            nextEntry = nextEntry.next;
+            idx++;
+         }
+
+         previous.next = firstEntry;
+         nextEntry.next = current;
+
+         this.size += values.length;
       },
 
       removeAt(index) {
@@ -177,8 +199,7 @@ export default function LinkedList() {
             output += `(${current.value}) -> `;
             current = current.next;
          }
-         output += "null";
-         return output;
+         return (output += "null");
       },
    };
 }

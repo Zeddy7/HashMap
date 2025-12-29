@@ -58,13 +58,9 @@ export default function HashMap() {
             throw new Error("Trying to access index out of bounds");
          }
          let list = buckets[index];
-         let current = list.head;
+         if (!list) return false;
 
-         while (current) {
-            if (current.key === key) return true;
-            current = current.next;
-         }
-         return false;
+         return list.contains(key);
       },
 
       remove(key) {
