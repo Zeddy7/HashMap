@@ -3,7 +3,7 @@
 function HashMap() {
    let capacity = 16;
    let loadFactor = 0.75;
-   let buckets = new Array(capacity).fill(null).map(() => []);
+   let buckets = new Array(capacity).fill(null).map(() => LinkedList());
    return {
       capacity,
       loadFactor,
@@ -23,9 +23,22 @@ function HashMap() {
 
       set(key, value) {
          let index = this.hash(key);
+         let list = buckets[index];
 
          if (this.size == capacity * this.loadFactor) this.resize();
-
+         if (this.size >= capacity * loadFactor) {
+            this.resize();
+            // Recalculate index because capacity changed!
+            index = this.hash(key);
+            list = buckets[index];
+         }
+         let node = list.findIndex(key);
+         if (node) {
+            node.value = value; // Update existing
+         } else {
+            list.append(key, value); // Add new node
+            this.size++;
+         }
          if (buckets[index]) {
             let nestedList = buckets[index];
 
