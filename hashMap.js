@@ -1,4 +1,6 @@
-function HashMap() {
+import LinkedList from "./linkedList.js";
+
+export default function HashMap() {
    let capacity = 16;
    let loadFactor = 0.75;
    let buckets = new Array(capacity).fill(null).map(() => LinkedList());
