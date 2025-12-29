@@ -1,5 +1,3 @@
-// import LinkedList from "./linkedList.js";
-
 function HashMap() {
    let capacity = 16;
    let loadFactor = 0.75;
@@ -25,46 +23,31 @@ function HashMap() {
          let index = this.hash(key);
          let list = buckets[index];
 
-         if (this.size == capacity * this.loadFactor) this.resize();
          if (this.size >= capacity * loadFactor) {
             this.resize();
-            // Recalculate index because capacity changed!
             index = this.hash(key);
             list = buckets[index];
          }
-         let node = list.findIndex(key);
+
+         let node = list.findNode(key);
          if (node) {
-            node.value = value; // Update existing
+            node.value = value;
          } else {
-            list.append(key, value); // Add new node
+            list.append(key, value);
             this.size++;
          }
-         if (buckets[index]) {
-            let nestedList = buckets[index];
-
-            for (const subArray of nestedList) {
-               if (subArray[0] === key) {
-                  subArray[1] = value;
-                  return;
-               }
-            }
-
-            buckets[index].push([key, value]);
-         } else {
-            buckets[index] = [[key, value]];
-         }
-
-         this.size++;
       },
 
       get(key) {
          let index = this.hash(key);
-         if (index < 0 || index >= buckets.length) {
-            throw new Error("Trying to access index out of bounds");
-         }
-         if (!buckets[index].find(x => x[0] === key)) return null;
+         let list = buckets[index];
+         let current = list.head;
 
-         return buckets[index].find(x => x[0] === key)[1];
+         while (current) {
+            if (current.key === key) return current.value;
+            current = current.next;
+         }
+         return null;
       },
 
       has(key) {
@@ -72,24 +55,26 @@ function HashMap() {
          if (index < 0 || index >= buckets.length) {
             throw new Error("Trying to access index out of bounds");
          }
-         if (!buckets[index].find(x => x[0] === key)) return false;
+         let list = buckets[index];
+         let current = list.head;
 
-         return true;
+         while (current) {
+            if (current.key === key) return true;
+            current = current.next;
+         }
+         return false;
       },
 
       remove(key) {
          let index = this.hash(key);
-         let nestedList = buckets[index];
+         let list = buckets[index];
+         let listIndex = list.findIndex(key);
 
-         for (let i = 0; i < nestedList.length; i++) {
-            if (nestedList[i][0] === key) {
-               nestedList.splice(i, 1);
-               nestedList;
-               this.size--;
-               return true;
-            }
+         if (listIndex !== undefined && listIndex !== -1) {
+            list.removeAt(listIndex);
+            this.size--;
+            return true;
          }
-
          return false;
       },
 
@@ -98,21 +83,45 @@ function HashMap() {
       },
 
       clear() {
-         buckets = new Array(capacity).fill(null).map(() => []);
+         buckets = new Array(capacity).fill(null).map(() => LinkedList());
          this.buckets = buckets;
          this.size = 0;
       },
 
       keys() {
-         return buckets.flat().map(p => p[0]);
+         let allKeys = [];
+         buckets.forEach(list => {
+            let current = list.head;
+            while (current) {
+               allKeys.push(current.key);
+               current = current.next;
+            }
+         });
+         return allKeys;
       },
 
       values() {
-         return buckets.flat().map(p => p[1]);
+         let allValues = [];
+         buckets.forEach(list => {
+            let current = list.head;
+            while (current) {
+               allValues.push(current.value);
+               current = current.next;
+            }
+         });
+         return allValues;
       },
 
       entries() {
-         return buckets.flat();
+         let allEntries = [];
+         buckets.forEach(list => {
+            let current = list.head;
+            while (current) {
+               allEntries.push([current.key, current.value]);
+               current = current.next;
+            }
+         });
+         return allEntries;
       },
 
       resize() {
@@ -121,59 +130,10 @@ function HashMap() {
          this.capacity = capacity;
 
          this.size = 0;
-         buckets = new Array(capacity).fill(null).map(() => []);
+         buckets = new Array(capacity).fill(null).map(() => LinkedList());
          this.buckets = buckets;
 
          oldEntries.forEach(([key, value]) => this.set(key, value));
       },
    };
 }
-
-const test = HashMap();
-
-test.set("apple", "red");
-console.log(test.get("apple"));
-test.set("banana", "yellow");
-console.log(test.get("banana"));
-test.set("carrot", "orange");
-console.log(test.get("carrot"));
-test.set("dog", "brown");
-console.log(test.get("dog"));
-
-console.log(test.length());
-
-console.log(test.has("banana"));
-console.log(test.has("banan"));
-
-console.log(test.remove("banana"));
-console.log(test.get("apple"));
-console.log(test.length());
-
-console.log(test.buckets);
-console.log(test.keys());
-console.log(test.values());
-console.log(test.entries());
-test.clear();
-test.set("elephant", "gray");
-console.log(test.get("elephant"));
-test.set("frog", "green");
-console.log(test.get("frog"));
-test.set("grape", "purple");
-console.log(test.get("grape"));
-test.set("hat", "black");
-console.log(test.get("hat"));
-test.set("ice cream", "white");
-console.log(test.get("ice cream"));
-test.set("jacket", "blue");
-console.log(test.get("jacket"));
-test.set("kite", "pink");
-console.log(test.get("kite"));
-test.set("lion", "golden");
-console.log(test.get("lion"));
-test.set("moon", "silver");
-test.set("moo", "silver");
-test.set("moow", "silver");
-test.set("mooew", "silver");
-
-console.log(test.length());
-console.log(test.buckets);
